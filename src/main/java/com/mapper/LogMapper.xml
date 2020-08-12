@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mapper.LogMapper">
+
+<!-- 
+if 
+set if
+where if
+where choose when
+otherwise
+trim 
+bind
+foreach
+include
+ -->
+	<select id="selByAccOutAccIn1" resultType="LogInfo">
+		select * from log where 1=1
+		<if test="accOut!=null and accOut !=''">
+			and accOut=#{accOut}
+		</if>
+		<if test="accIn!=null and accIn !=''">
+			and accIn=#{accIn}
+		</if>
+	</select>
+
+	<select id="selByAccOutAccIn2" resultType="LogInfo">
+		select * from log
+		<where>
+			<if test="accOut!=null and accOut !=''">
+				and accOut=#{accOut}
+			</if>
+			<if test="accIn!=null and accIn !=''">
+				and accIn=#{accIn}
+			</if>
+		</where>
+	</select>
+
+	<!-- 只有有一个成立,其他都不执行 -->
+	<select id="selByAccOutAccIn3" resultType="LogInfo">
+		select * from log
+		<where>                                           
+			<choose>
+				<when test="accIn!=null and accIn !=''">and accIn=#{accIn}</when>
+				<when test="accOut!=null and accOut !=''">and accOut=#{accOut}</when>
+			</choose>
+		</where>
+	</select>
+
+	<update id="updLogInfo" parameterType="LogInfo">
+		update log
+		<set>
+			<!-- 写id=#{id}是防止不生成set语法错误 -->
+			id=#{id},
+			<if test="accOut!=null and accOut !=''">
+				accOut=#{accOut},
+			</if>
+			<if test="accIn!=null and accIn !=''">
+				accIn=#{accIn},
+			</if>
+		</set>
+		where id=#{id}
+	</update>
+
+	<select id="selByAccOutAccIn4" resultType="LogInfo">
+		select * from log
+		<trim prefix="where" prefixOverrides="and">
+			and accOut=#{accOut}
+		</trim>
+	</select>
+
+	<update id="updLogInfo2" parameterType="LogInfo">
+		update log
+		<!-- 多用于处理钱 ￥100 之类的操作 ，不过中间会自动加一个空格,要想没有空格参考下面的方法 -->
+		<trim prefix="set" suffixOverrides=",">
+			accOut=#{accOut},accIn=#{accIn},
+		</trim>
+		where id=#{id}
+	</update>
+
+	<select id="selByAccOutAccIn5" resultType="LogInfo">
+		<!-- 传过来值的基础上重新设置一下值，主要用于模糊查询 -->
+		<bind name="accOut" value="'%'+accOut+'%'" />
+		select * from log
+		<trim prefix="where" prefixOverrides="and">
+			and accOut like #{accOut}
+		</trim>
+	</select>
+
+	<select id="selIn" parameterType="list" resultType="LogInfo">
+		select * from log where id in
+		<!-- foreach多用于in查询 -->
+		<foreach collection="list" item="abc" open="(" close=")" separator=",">
+			#{abc}
+		</foreach>
+	</select>
+
+	<insert id="ins" parameterType="list">
+		insert into log values
+		<trim suffixOverrides=",">
+			<foreach collection="list" item="abc">
+				(default,#{abc},2,666),
+			</foreach>
+		</trim>
+	</insert>
+
+	<select id="selByAccOutAccIn6" resultType="LogInfo">
+		select
+		<include refid="mysql"></include>
+		from log where accOut=#{accOut}
+	</select>
+	<!-- 希望某些sql片段复用 -->
+	<sql id="mysql">
+		id,accout,accin,money
+	</sql>
+	
+</mapper>
