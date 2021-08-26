@@ -3,8 +3,6 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.mapper.LogMapper">
-
 <!-- 
 if 
 set if
@@ -16,6 +14,8 @@ bind
 foreach
 include
  -->
+<mapper namespace="com.mapper.LogMapper">
+
 	<select id="selByAccOutAccIn1" resultType="LogInfo">
 		select * from log where 1=1
 		<if test="accOut!=null and accOut !=''">
